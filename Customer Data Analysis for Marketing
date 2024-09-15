@@ -1,0 +1,41 @@
+Sample Code Snippet for Customer Segmentation:
+python
+Copy code
+import pandas as pd
+from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.preprocessing import StandardScaler
+
+# Step 1: Load customer data (assumed to have 'customer_id', 'purchase_amount', 'purchase_frequency', 'last_purchase_days')
+data = pd.read_csv('customer_data.csv')
+
+# Step 2: Feature engineering (RFM - Recency, Frequency, Monetary value)
+# 'purchase_frequency': total number of purchases
+# 'purchase_amount': sum of all purchases
+# 'last_purchase_days': days since last purchase
+
+# Step 3: Standardize data
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(data[['purchase_frequency', 'purchase_amount', 'last_purchase_days']])
+
+# Step 4: Apply K-Means Clustering
+kmeans = KMeans(n_clusters=4)  # Segmenting customers into 4 clusters
+data['cluster'] = kmeans.fit_predict(scaled_data)
+
+# Step 5: Visualize the clusters
+plt.figure(figsize=(10, 6))
+sns.scatterplot(data=data, x='purchase_frequency', y='purchase_amount', hue='cluster', palette='viridis')
+plt.title('Customer Segmentation based on Purchase Behavior')
+plt.show()
+
+# Step 6: Analyze each segment
+cluster_summary = data.groupby('cluster').agg({
+    'purchase_frequency': ['mean', 'count'],
+    'purchase_amount': ['mean', 'sum'],
+    'last_purchase_days': ['mean']
+}).reset_index()
+print(cluster_summary)
+
+# Step 7: Output customer segments for targeted marketing (e.g., send to database or CSV)
+data.to_csv('segmented_customers.csv', index=False)
